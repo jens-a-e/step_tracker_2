@@ -1,7 +1,7 @@
 /**
  * Simple wearable data logger to explore probes on resonance
  * 
- * TODO: Add Battery level to logged output to monitor the energy consumption
+ * TODO: - [x] Add Battery level to logged output to monitor the energy consumption
  */
 
 
@@ -46,7 +46,6 @@ volatile int samplesRead; // number of samples read
 int32_t getPDMwave(int32_t samples);
 
 void flash() {
-  pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(200);
   digitalWrite(LED_BUILTIN, LOW);  
@@ -60,6 +59,8 @@ void flash(int times) {
 }
 
 void setup(void) {
+    pinMode(LED_BUILTIN, OUTPUT);
+
   Serial.begin(115200);
   // while (!Serial) delay(10);
   Serial.println("Feather Sense Sensor Demo");
@@ -92,7 +93,8 @@ void setup(void) {
   lis3mdl.begin_I2C();
   lsm6ds33.begin_I2C();
   lsm6ds33.enablePedometer(true); // Magic happends here :)
-  // TODO: Reset the pedometer in case the reset button has been pressed and the device was powered before.
+  // Reset the pedometer in case the reset button has been pressed and the device was powered before.
+  lsm6ds33.resetPedometer();
 
   sht30.begin();
   PDM.onReceive(onPDMdata);
@@ -103,6 +105,30 @@ void setup(void) {
     db.println("# New record " + date_fmt());
     db.flush();
   }
+}
+
+/**
+ * Code from https://learn.adafruit.com/adafruit-feather-sense/power-management
+ */
+float read_batt() {
+  // Arduino Example Code snippet
+
+  #define VBATPIN A6
+
+  float measuredvbat = analogRead(VBATPIN);
+  measuredvbat *= 2;    // we divided by 2, so multiply back
+  measuredvbat *= 3.3;  // Multiply by 3.3V, our reference voltage
+  measuredvbat /= 1024; // convert to voltage
+  return measuredvbat;
+}
+
+// A couple of simple functional style log helpers
+inline String add_log(String val) {
+  return val + ",";
+}
+
+inline String end_log(String val) {
+  return val + "\r\n";
 }
 
 void loop(void) {
@@ -130,6 +156,7 @@ void loop(void) {
   accel_z = accel.acceleration.z;
   steps = lsm6ds33.readPedometer();
 
+
   gyro_x = gyro.gyro.x;
   gyro_y = gyro.gyro.y;
   gyro_z = gyro.gyro.z;
@@ -139,7 +166,7 @@ void loop(void) {
   samplesRead = 0;
   mic = getPDMwave(4000);
 
-  int batt = 0;
+  float batt = read_batt();
 
   // Log the data to the CSV file
 
@@ -149,85 +176,74 @@ void loop(void) {
   db = SD.open("datalog.txt", FILE_WRITE);
 
   // If there is not an SD card present, flash 3 times and try again
-  // TODO: Add a multi stage retry to slowly escalte. Is there a way to know when the SD card is inserted?
+  // TODO: Add a multi stage retry to slowly escalate. Is there a way to know when the SD card is inserted?
   if (!db) {
     flash(3);
     delay(1000);
     return;
   }
+
+  digitalWrite(LED_BUILTIN, HIGH);
+
   String date =
   // Timestamp
-  date_fmt()
+    add_log(date_fmt())
   // Serial.print("Proximity: ");
-  + String(apds9960.readProximity())
-  + ","
+  + add_log(String(apds9960.readProximity()))
   // Serial.print("Red: ");
-  + String(r)
-  + ","
+  + add_log(String(r))
   // Serial.print(" Green: ");
-  + String(g)
-  + ","
+  + add_log(String(g))
   // Serial.print(" Blue :");
-  + String(b)
-  + ","
+  + add_log(String(b))
   // Serial.print(" Clear: ");
-  + String(c)
-  + ","
+  + add_log(String(c))
   // Serial.print("Temperature: ");
-  + String(temperature)
-  + ","
+  + add_log(String(temperature))
   // Serial.println(" C");
   // Serial.print("Barometric pressure: ");
-  + String(pressure)
-  + ","
+  + add_log(String(pressure))
   // Serial.print("Altitude: ");
-  + String(altitude)
-  + ","
+  + add_log(String(altitude))
   // Serial.println(" m");
   // Serial.print("Magnetic: ");
-  + String(magnetic_x)
-  + ","
+  + add_log(String(magnetic_x))
   // Serial.print(" ");
-  + String(magnetic_y)
-  + ","
+  + add_log(String(magnetic_y))
   // Serial.print(" ");
-  + String(magnetic_z)
-  + ","
+  + add_log(String(magnetic_z))
   // Serial.println(" uTesla");
   // Serial.print("Acceleration: ");
-  + String(accel_x)
-  + ","
+  + add_log(String(accel_x))
   // Serial.print(" ");
-  + String(accel_y)
-  + ","
+  + add_log(String(accel_y))
   // Serial.print(" ");
-  + String(accel_z)
-  + ","
+  + add_log(String(accel_z))
   // Serial.println(" m/s^2");
   // Serial.print("Gyro: ");
-  + String(gyro_x)
-  + ","
+  + add_log(String(gyro_x))
   // Serial.print(" ");
-  + String(gyro_y)
-  + ","
+  + add_log(String(gyro_y))
   // Serial.print(" ");
-  + String(gyro_z)
-  + ","
+  + add_log(String(gyro_z))
   // Serial.println(" dps");
   // Serial.print("Humidity: ");
-  + String(humidity)
-  + ","
+  + add_log(String(humidity))
   // Serial.println(" %");
   // Serial.print("Mic: ");
-  + String(mic)
-  + ","
-  + String(batt)
-  + ","
-  + String(steps);
+  + add_log(String(mic))
+  + add_log(String(batt))
+  + end_log(String(steps));
 
-  db.println(date);
+  db.print(date);
   db.flush(); //; make it sure it is written to disk
   flash();
+  Serial.print(date);
+  
+  digitalWrite(LED_BUILTIN, LOW);
+
+  // Reset the pedometer after a successful write to make sure to keep steps recorded even when there is no SD card
+  lsm6ds33.resetPedometer();
   delay(1000);
 }
 
