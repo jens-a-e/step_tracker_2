@@ -27,6 +27,7 @@ uint16_t r, g, b, c;
 float temperature, pressure, altitude;
 float magnetic_x, magnetic_y, magnetic_z;
 float accel_x, accel_y, accel_z;
+int steps;
 float gyro_x, gyro_y, gyro_z;
 float humidity;
 int32_t mic;
@@ -36,6 +37,13 @@ short sampleBuffer[256];  // buffer to read samples into, each sample is 16-bits
 volatile int samplesRead; // number of samples read
 
 int32_t getPDMwave(int32_t samples);
+
+void flash() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(200);
+  digitalWrite(LED_BUILTIN, LOW);  
+}
 
 void setup(void) {
   Serial.begin(115200);
@@ -66,9 +74,17 @@ void setup(void) {
   bmp280.begin();
   lis3mdl.begin_I2C();
   lsm6ds33.begin_I2C();
+  lsm6ds33.enablePedometer(true); // Magic happends here :)
+
   sht30.begin();
   PDM.onReceive(onPDMdata);
   PDM.begin(1, 16000);
+
+  db = SD.open("datalog.txt", FILE_WRITE);
+  if (db) {
+    db.println("# New record " + date_fmt());
+    db.flush();
+  }
 }
 
 void loop(void) {
@@ -94,6 +110,7 @@ void loop(void) {
   accel_x = accel.acceleration.x;
   accel_y = accel.acceleration.y;
   accel_z = accel.acceleration.z;
+  steps = lsm6ds33.readPedometer();
   gyro_x = gyro.gyro.x;
   gyro_y = gyro.gyro.y;
   gyro_z = gyro.gyro.z;
@@ -104,11 +121,12 @@ void loop(void) {
   mic = getPDMwave(4000);
 
   // Log the data to the CSV file
-  db = SD.open("datalog.txt", FILE_WRITE);
 
   Serial.println("\nFeather Sense Sensor Demo" + date_fmt());
   Serial.println("---------------------------------------------");
   
+  db = SD.open("datalog.txt", FILE_WRITE);
+
   String date =
   date_fmt()
   // Serial.print("Proximity: ");
@@ -175,6 +193,7 @@ void loop(void) {
   + String(mic);
   db.println(date);
   db.flush(); //; make it sure it is written to disk
+  flash();
   delay(1000);
 }
 
