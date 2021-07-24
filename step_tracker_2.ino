@@ -52,7 +52,7 @@ void flash() {
 }
 
 void flash(int times) {
-  while(--times) {
+  while(times--) {
     flash();
     delay(200);
   }
