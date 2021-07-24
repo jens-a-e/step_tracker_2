@@ -45,6 +45,13 @@ void flash() {
   digitalWrite(LED_BUILTIN, LOW);  
 }
 
+void flash(int times) {
+  while(--times) {
+    flash();
+    delay(200);
+  }
+}
+
 void setup(void) {
   Serial.begin(115200);
   // while (!Serial) delay(10);
@@ -64,7 +71,10 @@ void setup(void) {
   if (!SD.begin(chipSelect)) {
     Serial.println("Card failed, or not present");
     // don't do anything more:
-    while (1);
+    while (1) {
+      flash(10);
+      while(1);
+    }
   }
 
   // initialize the sensors
@@ -126,6 +136,14 @@ void loop(void) {
   Serial.println("---------------------------------------------");
   
   db = SD.open("datalog.txt", FILE_WRITE);
+
+  // If there is not an SD card present, flash 3 times and try again
+  // TODO: Add a multi stage retry to slowly escalte. Is there a way to know when the SD card is inserted?
+  if (!db) {
+    flash(3);
+    delay(1000);
+    return;
+  }
 
   String date =
   date_fmt()
