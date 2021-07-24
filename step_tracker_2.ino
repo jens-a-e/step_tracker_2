@@ -1,3 +1,10 @@
+/**
+ * Simple wearable data logger to explore probes on resonance
+ * 
+ * TODO: Add Battery level to logged output to monitor the energy consumption
+ */
+
+
 #include <RTClib.h>
 
 #include <Adafruit_APDS9960.h>
@@ -85,6 +92,7 @@ void setup(void) {
   lis3mdl.begin_I2C();
   lsm6ds33.begin_I2C();
   lsm6ds33.enablePedometer(true); // Magic happends here :)
+  // TODO: Reset the pedometer in case the reset button has been pressed and the device was powered before.
 
   sht30.begin();
   PDM.onReceive(onPDMdata);
@@ -121,6 +129,7 @@ void loop(void) {
   accel_y = accel.acceleration.y;
   accel_z = accel.acceleration.z;
   steps = lsm6ds33.readPedometer();
+
   gyro_x = gyro.gyro.x;
   gyro_y = gyro.gyro.y;
   gyro_z = gyro.gyro.z;
@@ -129,6 +138,8 @@ void loop(void) {
 
   samplesRead = 0;
   mic = getPDMwave(4000);
+
+  int batt = 0;
 
   // Log the data to the CSV file
 
@@ -144,8 +155,8 @@ void loop(void) {
     delay(1000);
     return;
   }
-
   String date =
+  // Timestamp
   date_fmt()
   // Serial.print("Proximity: ");
   + String(apds9960.readProximity())
@@ -208,7 +219,12 @@ void loop(void) {
   + ","
   // Serial.println(" %");
   // Serial.print("Mic: ");
-  + String(mic);
+  + String(mic)
+  + ","
+  + String(batt)
+  + ","
+  + String(steps);
+
   db.println(date);
   db.flush(); //; make it sure it is written to disk
   flash();
