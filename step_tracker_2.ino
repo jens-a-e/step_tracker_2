@@ -2,6 +2,7 @@
  * Simple wearable data logger to explore probes on resonance
  * 
  * TODO: - [x] Add Battery level to logged output to monitor the energy consumption
+ * Version 0.0.3
  */
 
 
@@ -19,7 +20,6 @@
 #include <SD.h>
 
 const int chipSelect = 10; // 10 for the logger SD card on the Feather
-File db;
 
 RTC_PCF8523 rtc;
 
@@ -100,7 +100,7 @@ void setup(void) {
   PDM.onReceive(onPDMdata);
   PDM.begin(1, 16000);
 
-  db = SD.open("datalog.txt", FILE_WRITE);
+  File db = SD.open("datalog.txt", FILE_WRITE);
   if (db) {
     db.println("# New record " + date_fmt());
     db.flush();
@@ -173,7 +173,7 @@ void loop(void) {
   Serial.println("\nFeather Sense Sensor Demo" + date_fmt());
   Serial.println("---------------------------------------------");
   
-  db = SD.open("datalog.txt", FILE_WRITE);
+  File db = SD.open("datalog.txt", FILE_WRITE);
 
   // If there is not an SD card present, flash 3 times and try again
   // TODO: Add a multi stage retry to slowly escalate. Is there a way to know when the SD card is inserted?
