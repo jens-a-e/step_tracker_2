@@ -60,10 +60,6 @@ microphone = audiobusio.PDMIn(
 
 neo = neopixel.NeoPixel(board.NEOPIXEL, 1, pixel_order=neopixel.RGB)
 
-# The Real Time Clock
-rtc = adafruit_pcf8523.PCF8523(i2c)
-
-
 def normalized_rms(values):
     minbuf = int(sum(values) / len(values))
     return int(
@@ -93,6 +89,9 @@ def reset_pedometer():
     lsm6ds33.pedometer_enable = False
     lsm6ds33.pedometer_enable = True
 
+
+# The Real Time Clock
+rtc = adafruit_pcf8523.PCF8523(i2c)
 
 def timestamp():
     t = rtc.datetime
