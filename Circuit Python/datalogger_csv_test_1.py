@@ -60,6 +60,10 @@ microphone = audiobusio.PDMIn(
 
 neo = neopixel.NeoPixel(board.NEOPIXEL, 1, pixel_order=neopixel.RGB)
 
+# The Real Time Clock
+rtc = adafruit_pcf8523.PCF8523(i2c)
+
+
 def normalized_rms(values):
     minbuf = int(sum(values) / len(values))
     return int(
@@ -90,9 +94,6 @@ def reset_pedometer():
     lsm6ds33.pedometer_enable = True
 
 
-# The Real Time Clock
-rtc = adafruit_pcf8523.PCF8523(i2c)
-
 def timestamp():
     t = rtc.datetime
     return "{}-{}-{}T{}:{}:{}".format(
@@ -114,8 +115,6 @@ with logfile() as file:
 
 try:
     while True:
-        print(switch.value)
-
         # Turn off the onbaord neopixel
         neo[0] = (0, 0, 0)
 
@@ -125,7 +124,7 @@ try:
 
         samples = array.array("H", [0] * 160)
         microphone.record(samples, len(samples))
-        
+
         # print("\nTime", now)
         # print("Feather Sense Sensor Demo")
         # print("---------------------------------------------")
