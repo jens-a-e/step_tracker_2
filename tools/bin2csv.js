@@ -1,5 +1,6 @@
 const { readFile } = require('fs')
 
+process.env.TZ = 'Europe/Berlin'
 
 // struct Record {
   // uint32_t time;
@@ -15,6 +16,13 @@ const { readFile } = require('fs')
   // float humidity;
   // float batt;
 // } record;
+
+const toDate = time => {
+  const utc = new Date(time*1000)
+  const date = new Date(utc.getTime()) // correct the time zone, quick hack, needs improvement
+  date.setHours(utc.getUTCHours())
+  return date
+}
 
 /**
  * 
@@ -47,7 +55,7 @@ const parseRecord = chunk => {
   const humidity    = chunk.readFloatLE(p);   p += 4
   const batt        = chunk.readFloatLE(p);   p += 4
   return {
-    time,
+    time: toDate(time),
     proximity,
     r,
     g,
@@ -92,4 +100,7 @@ readFile(process.argv[2], (err, data) => {
     return chunks
   }, [])
 
+  const csv = chunks.slice(chunks.length - 3).map(c => Object.values(c).join(',')).join('\n')
+  console.log(csv)
+  console.log(new Date() +"")
 })
