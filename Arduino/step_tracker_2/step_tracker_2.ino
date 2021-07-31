@@ -107,25 +107,25 @@ void setup(void) {
   Serial.begin(115200);
   while (!Serial) delay(10);
   Serial.println("Feather Sense Sensor Demo");
-  Serial.print("Data raw record byte size: "); Serial.println(sizeof(RawRecord));
-  Serial.print("Data record byte size: "); Serial.println(sizeof(Record));
-  Serial.print("size of float: "); Serial.println(sizeof(float));
-  Serial.print("size of uint8_t: "); Serial.println(sizeof(uint8_t));
-  Serial.print("size of uint16_t: "); Serial.println(sizeof(uint16_t));
-  Serial.print("size of int32_t: "); Serial.println(sizeof(int32_t));
-  Serial.print("Data record byte size: "); Serial.println(0
-    + 4    //   int32_t time; 
-    + 1    //   uint8_t proximity;
-    + 4*2  //   uint16_t r, g, b, c;
-    + 3*4  //   float temperature, pressure, altitude;
-    + 3*4  //   float magnetic_x, magnetic_y, magnetic_z;
-    + 3*4  //   float accel_x, accel_y, accel_z;
-    + 3*4  //   float gyro_x, gyro_y, gyro_z;
-    + 1*4  //   float humidity;
-    + 1*4  //   int32_t mic;
-    + 1*4  //   float batt;
-    + 1*1  //   uint8_t steps;
-  );
+  // Serial.print("Data raw record byte size: "); Serial.println(sizeof(RawRecord));
+  // Serial.print("Data record byte size: "); Serial.println(sizeof(Record));
+  // Serial.print("size of float: "); Serial.println(sizeof(float));
+  // Serial.print("size of uint8_t: "); Serial.println(sizeof(uint8_t));
+  // Serial.print("size of uint16_t: "); Serial.println(sizeof(uint16_t));
+  // Serial.print("size of int32_t: "); Serial.println(sizeof(int32_t));
+  // Serial.print("Data record byte size: "); Serial.println(0
+  //   + 4    //   int32_t time; 
+  //   + 1    //   uint8_t proximity;
+  //   + 4*2  //   uint16_t r, g, b, c;
+  //   + 3*4  //   float temperature, pressure, altitude;
+  //   + 3*4  //   float magnetic_x, magnetic_y, magnetic_z;
+  //   + 3*4  //   float accel_x, accel_y, accel_z;
+  //   + 3*4  //   float gyro_x, gyro_y, gyro_z;
+  //   + 1*4  //   float humidity;
+  //   + 1*4  //   int32_t mic;
+  //   + 1*4  //   float batt;
+  //   + 1*1  //   uint8_t steps;
+  // );
 
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
@@ -162,37 +162,37 @@ void setup(void) {
   PDM.onReceive(onPDMdata);
   PDM.begin(1, 16000);
 
-  // Test writing binary records
-  SD.remove("bintest.dat");
-  File bintest = SD.open("bintest.dat", FILE_WRITE);
+  // // Test writing binary records
+  // SD.remove("bintest.dat");
+  // File bintest = SD.open("bintest.dat", FILE_WRITE);
 
-  Record r = new_record();
-  for (int32_t i = 0; i<100; i++) {
-    r.time++;
-    r.proximity++;
-    r.r++;
-    r.g++;
-    r.b++;
-    r.c++;
-    r.temperature++;
-    r.pressure++;
-    r.altitude++;
-    r.magnetic_x++;
-    r.magnetic_y++;
-    r.magnetic_z++;
-    r.accel_x++;
-    r.accel_y++;
-    r.accel_z++;
-    r.gyro_x++;
-    r.gyro_y++;
-    r.gyro_z++;
-    r.humidity++;
-    r.mic++;
-    r.batt++;
-    r.steps++;
-    bintest.write((byte*) &r, sizeof(Record));
-  }
-  bintest.flush();
+  // Record r = new_record();
+  // for (int32_t i = 0; i<100; i++) {
+  //   r.time++;
+  //   r.proximity++;
+  //   r.r++;
+  //   r.g++;
+  //   r.b++;
+  //   r.c++;
+  //   r.temperature++;
+  //   r.pressure++;
+  //   r.altitude++;
+  //   r.magnetic_x++;
+  //   r.magnetic_y++;
+  //   r.magnetic_z++;
+  //   r.accel_x++;
+  //   r.accel_y++;
+  //   r.accel_z++;
+  //   r.gyro_x++;
+  //   r.gyro_y++;
+  //   r.gyro_z++;
+  //   r.humidity++;
+  //   r.mic++;
+  //   r.batt++;
+  //   r.steps++;
+  //   bintest.write((byte*) &r, sizeof(Record));
+  // }
+  // bintest.flush();
 
   // Insert a comment line to indicate a restart of the board
   File db = SD.open("datalog.txt", FILE_WRITE);
@@ -227,129 +227,79 @@ inline String end_log(String val) {
 }
 
 void loop(void) {
-
-  Record r = new_record();
-
-  r.time = rtc.now().unixtime();
-
-  r.proximity = apds9960.readProximity();
-  while (!apds9960.colorDataReady()) {
-    delay(5);
-  }
-  apds9960.getColorData(&r.r, &r.g, &r.b, &r.c);
-
-  r.temperature = bmp280.readTemperature();
-  r.pressure = bmp280.readPressure();
-  r.altitude = bmp280.readAltitude(1013.25);
-
-  lis3mdl.read();
-  r.magnetic_x = lis3mdl.x;
-  r.magnetic_y = lis3mdl.y;
-  r.magnetic_z = lis3mdl.z;
-
-  sensors_event_t accel;
-  sensors_event_t gyro;
-  sensors_event_t temp;
-  lsm6ds33.getEvent(&accel, &gyro, &temp);
-  r.accel_x = accel.acceleration.x;
-  r.accel_y = accel.acceleration.y;
-  r.accel_z = accel.acceleration.z;
-  r.steps = lsm6ds33.readPedometer();
-
-
-  r.gyro_x = gyro.gyro.x;
-  r.gyro_y = gyro.gyro.y;
-  r.gyro_z = gyro.gyro.z;
-
-  r.humidity = sht30.readHumidity();
-
-  samplesRead = 0;
-  r.mic = getPDMwave(4000);
-
-  float batt = read_batt();
-  r.batt = batt;
-
-  // Log the data to the CSV file
-
   Serial.println("\nFeather Sense Sensor Demo" + date_fmt());
   Serial.println("---------------------------------------------");
   
-  File db = SD.open("datalog.txt", FILE_WRITE);
-  File dbin = SD.open("datalog.bin", FILE_WRITE);
-
-  // If there is not an SD card present, flash 3 times and try again
-  // TODO: Add a multi stage retry to slowly escalate. Is there a way to know when the SD card is inserted?
-  if (!db || !dbin) {
+  Record r;
+  read_record(&r);
+  // Log the data to the CSV file
+  digitalWrite(LED_BUILTIN, HIGH);
+  if(!log_record(&r)) {
     flash(3);
     delay(1000);
-    return;
   }
-
-  digitalWrite(LED_BUILTIN, HIGH);
-
-  String date =
-  // Timestamp
-    add_log(date_fmt())
-  // Serial.print("Proximity: ");
-  + add_log(String(r.proximity))
-  // Serial.print("Red: ");
-  + add_log(String(r.r))
-  // Serial.print(" Green: ");
-  + add_log(String(r.g))
-  // Serial.print(" Blue :");
-  + add_log(String(r.b))
-  // Serial.print(" Clear: ");
-  + add_log(String(r.c))
-  // Serial.print("Temperature: ");
-  + add_log(String(r.temperature))
-  // Serial.println(" C");
-  // Serial.print("Barometric pressure: ");
-  + add_log(String(r.pressure))
-  // Serial.print("Altitude: ");
-  + add_log(String(r.altitude))
-  // Serial.println(" m");
-  // Serial.print("Magnetic: ");
-  + add_log(String(r.magnetic_x))
-  // Serial.print(" ");
-  + add_log(String(r.magnetic_y))
-  // Serial.print(" ");
-  + add_log(String(r.magnetic_z))
-  // Serial.println(" uTesla");
-  // Serial.print("Acceleration: ");
-  + add_log(String(r.accel_x))
-  // Serial.print(" ");
-  + add_log(String(r.accel_y))
-  // Serial.print(" ");
-  + add_log(String(r.accel_z))
-  // Serial.println(" m/s^2");
-  // Serial.print("Gyro: ");
-  + add_log(String(r.gyro_x))
-  // Serial.print(" ");
-  + add_log(String(r.gyro_y))
-  // Serial.print(" ");
-  + add_log(String(r.gyro_z))
-  // Serial.println(" dps");
-  // Serial.print("Humidity: ");
-  + add_log(String(r.humidity))
-  // Serial.println(" %");
-  // Serial.print("Mic: ");
-  + add_log(String(r.mic))
-  + add_log(String(r.batt))
-  + end_log(String(r.steps));
-
-  db.print(date);
-  db.flush(); //; make it sure it is written to disk
-
-  Serial.print(date);
-
-  dbin.write((byte*) &r, sizeof(Record));
-  dbin.flush();
-
   digitalWrite(LED_BUILTIN, LOW);
 
   // Reset the pedometer after a successful write to make sure to keep steps recorded even when there is no SD card
   lsm6ds33.resetPedometer();
   delay(1000);
+}
+
+void read_record(Record* r) {
+
+  r->time = rtc.now().unixtime();
+
+  r->proximity = apds9960.readProximity();
+  while (!apds9960.colorDataReady()) {
+    delay(5);
+  }
+  apds9960.getColorData(&r->r, &r->g, &r->b, &r->c);
+
+  r->temperature = bmp280.readTemperature();
+  r->pressure = bmp280.readPressure();
+  r->altitude = bmp280.readAltitude(1013.25);
+
+  lis3mdl.read();
+  r->magnetic_x = lis3mdl.x;
+  r->magnetic_y = lis3mdl.y;
+  r->magnetic_z = lis3mdl.z;
+
+  sensors_event_t accel;
+  sensors_event_t gyro;
+  sensors_event_t temp;
+  lsm6ds33.getEvent(&accel, &gyro, &temp);
+  r->accel_x = accel.acceleration.x;
+  r->accel_y = accel.acceleration.y;
+  r->accel_z = accel.acceleration.z;
+  r->steps = lsm6ds33.readPedometer();
+
+
+  r->gyro_x = gyro.gyro.x;
+  r->gyro_y = gyro.gyro.y;
+  r->gyro_z = gyro.gyro.z;
+
+  r->humidity = sht30.readHumidity();
+
+  samplesRead = 0;
+  r->mic = getPDMwave(4000);
+
+  r->batt = read_batt();
+
+}
+
+void log_record(Record* r) {
+
+  // File db = SD.open("datalog.txt", FILE_WRITE);
+  File dbin = SD.open("datalog.bin", FILE_WRITE);
+
+  // If there is not an SD card present, flash 3 times and try again
+  // TODO: Add a multi stage retry to slowly escalate. Is there a way to know when the SD card is inserted?
+  if (!dbin) {
+    return 0;
+  }
+
+  dbin.write((byte*) r, sizeof(Record));
+  dbin.flush();
 }
 
 String date_fmt() {
