@@ -1,6 +1,6 @@
-"""clock - Simple clock module wrapping adafruit_pcf8523
+"""data logger csv - logs sensor data from a Feather Sense board to csv
 
-It adds a convenient `timestamp` method to the clock.
+TODO Use the FeatherSense class we made to imrpve readability of the code
 
 Copyright (C) 2021  jens alexander ewald <jens@poetic.systems>
 

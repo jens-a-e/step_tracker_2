@@ -40,9 +40,7 @@ import adafruit_pcf8523
 import digitalio
 import neopixel
 from analogio import AnalogIn
-
 from clock import RTC
-
 
 def normalized_rms(values):
     minbuf = int(sum(values) / len(values))

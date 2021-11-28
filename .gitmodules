@@ -1,3 +1,6 @@
 [submodule "Arduino/pedometer"]
 	path = Arduino/pedometer
 	url = https://github.com/jens-a-e/pedometer
+[submodule "Circuit Python/MIDIThing"]
+	path = Circuit Python/MIDIThing
+	url = https://github.com/jens-a-e/MIDIThing
