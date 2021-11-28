@@ -15,6 +15,10 @@ To enable Circuit Python on the Adafruit nrf52840 Feather Sense, follow this gui
 
 Exmaple code for the *Adafruit Feather nRF52840 Sense* can found / is copied form here: https://learn.adafruit.com/adafruit-feather-sense
 
+To test the *Adafruit Feather nRF52840 Sense* board this example sketch from the Adafruit tutorial: https://github.com/adafruit/Adafruit_Learning_System_Guides/blob/main/Adafruit_Feather_Sense/feather_sense_sensor_demo/feather_sense_sensor_demo.ino
+
+Some sketches are using an RTC clock. The module mus be initial set to a spcific date and time; also repeat after every battery change. The **/tools** folder contains the ubiquitous `RTCSetClock` sketch which can be found on many forums and tutorials. However, there is no URL where the code is hosted. Hence it is included in this repository with its respective copyright and license in the header of the file.
+
 # Licenses
 
 Source code written by the researcher in this repository is licensed under the Gnu Public License (GPL).
