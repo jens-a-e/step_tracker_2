@@ -6,7 +6,14 @@ These explroations are part of research activities investigating wearable Intern
 # Repository Contents
 
 * **/Arduio** - C/C++ code for Arduino and Adafruit Feather boards
-* **/Circuit Pyhton** - Prototypes written in Circuit Python enabling quicker iterations between code and testting.
+* **/Circuit Pyhton** - Prototypes written in Circuit Python for the Adafruit Feather Sense board enabling quicker iterations between code and testting.
+* **/tools/** - Contains custom tools and utility scripts for data handling and analysis.
+
+# Notes
+
+To enable Circuit Python on the Adafruit nrf52840 Feather Sense, follow this guide: https://learn.adafruit.com/adafruit-feather-sense/circuitpython-on-feather-sense
+
+Exmaple code for the *Adafruit Feather nRF52840 Sense* can found / is copied form here: https://learn.adafruit.com/adafruit-feather-sense
 
 # Licenses
 
