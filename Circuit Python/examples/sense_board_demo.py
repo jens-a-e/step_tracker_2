@@ -1,4 +1,10 @@
-"""Sensor demo for Adafruit Feather Sense. Prints data from each of the sensors."""
+"""
+Sensor demo for Adafruit Feather Sense. Prints data from each of the sensors.
+
+Copied from:
+https://github.com/adafruit/Adafruit_Learning_System_Guides/blob/main/Adafruit_Feather_Sense/code.py
+"""
+
 import time
 import array
 import math

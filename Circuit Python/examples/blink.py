@@ -1,3 +1,11 @@
+"""
+Simple Circtui Python blink example
+
+Used to test code upload and basic board functionality.
+Any blink example in the embedded space should be considered public domain :)
+
+"""
+
 import digitalio
 import board
 from time import sleep
