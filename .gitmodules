@@ -1,0 +1,3 @@
+[submodule "Arduino/pedometer"]
+	path = Arduino/pedometer
+	url = https://github.com/jens-a-e/pedometer
