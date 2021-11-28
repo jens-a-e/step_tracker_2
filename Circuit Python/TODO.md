@@ -1,1 +1,0 @@
-- [ ] Add a deep sleep exampole based on the `alarm` module

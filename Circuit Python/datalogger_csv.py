@@ -1,4 +1,28 @@
-"""Sensor demo for Adafruit Feather Sense. Prints data from each of the sensors."""
+"""clock - Simple clock module wrapping adafruit_pcf8523
+
+It adds a convenient `timestamp` method to the clock.
+
+Copyright (C) 2021  jens alexander ewald <jens@poetic.systems>
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <https://www.gnu.org/licenses/>.
+
+------
+
+This project has received funding from the European Union’s Horizon 2020
+research and innovation programme under the Marie Skłodowska-Curie grant
+agreement No. 813508.
+"""
+
 import time
 import array
 import math
@@ -24,10 +48,8 @@ led.switch_to_output()
 # Battery
 vbat_voltage = AnalogIn(board.VOLTAGE_MONITOR)
 
-
 def get_voltage(pin):
     return (pin.value * 3.3) / 65536 * 2
-
 
 # SD Card
 SD_CS_PIN = board.D10  # Pin 10 for Feather Boards
@@ -36,7 +58,6 @@ sd_cs = digitalio.DigitalInOut(SD_CS_PIN)
 sdcard = adafruit_sdcard.SDCard(spi, sd_cs)
 vfs = storage.VfsFat(sdcard)
 storage.mount(vfs, "/sd")  # Mount the SD Card under /sd
-
 
 # Boot switch
 switch = digitalio.DigitalInOut(board.SWITCH)
@@ -63,7 +84,6 @@ neo = neopixel.NeoPixel(board.NEOPIXEL, 1, pixel_order=neopixel.RGB)
 # The Real Time Clock
 rtc = adafruit_pcf8523.PCF8523(i2c)
 
-
 def normalized_rms(values):
     minbuf = int(sum(values) / len(values))
     return int(
@@ -72,7 +92,6 @@ def normalized_rms(values):
             / len(values)
         )
     )
-
 
 # Configure the Sensors
 apds9960.enable_proximity = True
@@ -88,11 +107,9 @@ lsm6ds33.accelerometer_data_rate = Rate.RATE_26_HZ
 lsm6ds33.gyro_data_rate = Rate.RATE_SHUTDOWN
 lsm6ds33.pedometer_enable = True
 
-
 def reset_pedometer():
     lsm6ds33.pedometer_enable = False
     lsm6ds33.pedometer_enable = True
-
 
 def timestamp():
     t = rtc.datetime
@@ -100,13 +117,10 @@ def timestamp():
         t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec
     )
 
-
 LOG_FILE = "/sd/data.csv"
-
 
 def logfile():
     return open(LOG_FILE, "at")
-
 
 # Prepare log file
 with logfile() as file:
